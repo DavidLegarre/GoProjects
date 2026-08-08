@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"bufio"
+	"fmt"
+	"os"
+)
 
 func Run() {
 	for {
@@ -30,6 +34,7 @@ func fetchInput() (input string) {
 
 func fetchName() (name string) {
 	fmt.Printf("Enter the name of the entry: ")
-	fmt.Scanln(&name)
-	return name
+	scanner := bufio.NewScanner(os.Stdin)
+	scanner.Scan()
+	return scanner.Text()
 }
