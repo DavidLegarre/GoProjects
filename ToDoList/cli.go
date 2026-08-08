@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 )
@@ -16,9 +17,11 @@ func run() {
 			fmt.Println()
 			entry := createEntry(fetch("Enter the name of the new entry: ", sc))
 			AddEntry(entry)
+			UpdateDB()
 		case "r":
 			fmt.Println("Removing an entry...")
 			fmt.Println()
+			UpdateDB()
 		case "l":
 			fmt.Println("Listing all entries...")
 			ListEntries()
@@ -35,4 +38,13 @@ func fetch(prompt string, sc *bufio.Scanner) string {
 	fmt.Print(prompt)
 	sc.Scan()
 	return sc.Text()
+}
+
+func UpdateDB() {
+	b, err := json.Marshal(Items)
+	if err != nil {
+		fmt.Println("Error marshalling list:", err)
+		return
+	}
+	writeJsonFile(b)
 }

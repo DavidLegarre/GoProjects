@@ -1,9 +1,12 @@
 package main
 
-import "todolist/types"
+import "os"
+
+const jsonFilePath = "./todolist.json"
 
 func readJsonFile() {
 }
 
-func writeJsonFile(data []types.TodoEntry) {
+func writeJsonFile(data []byte) {
+	os.WriteFile(jsonFilePath, data, 0644)
 }

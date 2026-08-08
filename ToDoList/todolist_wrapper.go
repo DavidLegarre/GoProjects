@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"todolist/types"
 )
@@ -14,6 +15,17 @@ func createEntry(name string) types.TodoEntry {
 
 func AddEntry(entry types.TodoEntry) {
 	Items.Entries = append(Items.Entries, entry)
+}
+
+func EntryToBytes(entry types.TodoEntry) []byte {
+	b, err := json.Marshal(entry)
+
+	if err != nil {
+		fmt.Println("Error marshalling entry:", err)
+		return nil
+	}
+
+	return b
 }
 
 func RemoveEntry(entry types.TodoEntry) {
