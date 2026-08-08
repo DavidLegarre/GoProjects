@@ -9,5 +9,5 @@ func main() {
 	fmt.Println("Hello, World!")
 	todo := types.TodoEntry{Name: "Buy groceries"}
 	fmt.Println(todo)
-	run()
+	Run()
 }
