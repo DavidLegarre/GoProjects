@@ -16,6 +16,9 @@ func run() {
 			fmt.Println()
 			entry := createEntry(fetch("Enter the name of the new entry: ", sc))
 			AddEntry(entry)
+		case "r":
+			fmt.Println("Removing an entry...")
+			fmt.Println()
 		case "l":
 			fmt.Println("Listing all entries...")
 			ListEntries()
