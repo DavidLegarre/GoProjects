@@ -67,11 +67,21 @@ func ReadDB() {
 	Items = todoList
 }
 
-func UpdateDB() {
+func WriteDB() {
 	b, err := json.Marshal(Items)
 	if err != nil {
 		fmt.Println("Error marshalling list:", err)
 		return
 	}
 	writeJsonFile(b)
+}
+
+func DeleteFromDB(entry types.TodoEntry) {
+	RemoveEntry(entry)
+	WriteDB()
+}
+
+func DeleteDB() {
+	Items = types.TodoList{Entries: []types.TodoEntry{}}
+	WriteDB()
 }
