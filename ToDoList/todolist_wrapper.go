@@ -6,33 +6,33 @@ import (
 )
 
 var sampleEntry types.TodoEntry = types.TodoEntry{Name: "Sample Entry"}
-var Entries types.TodoList = types.TodoList{Items: []types.TodoEntry{sampleEntry}}
+var Items types.TodoList = types.TodoList{Entries: []types.TodoEntry{sampleEntry}}
 
 func createEntry(name string) types.TodoEntry {
 	return types.TodoEntry{Name: name}
 }
 
 func AddEntry(entry types.TodoEntry) {
-	Entries.Items = append(Entries.Items, entry)
+	Items.Entries = append(Items.Entries, entry)
 }
 
 func RemoveEntry(entry types.TodoEntry) {
-	for i, e := range Entries.Items {
+	for i, e := range Items.Entries {
 		if e == entry {
-			Entries.Items = append(Entries.Items[:i], Entries.Items[i+1:]...)
+			Items.Entries = append(Items.Entries[:i], Items.Entries[i+1:]...)
 			break
 		}
 	}
 }
 
 func GetEntries() []types.TodoEntry {
-	return Entries.Items
+	return Items.Entries
 }
 
 func ListEntries() {
 	fmt.Println("Current To-Do List:")
 	fmt.Println()
-	for _, entry := range Entries.Items {
+	for _, entry := range Items.Entries {
 		fmt.Println(entry.Name)
 	}
 	fmt.Println()

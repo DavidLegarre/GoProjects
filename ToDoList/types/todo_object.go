@@ -5,5 +5,5 @@ type TodoEntry struct {
 }
 
 type TodoList struct {
-	Items []TodoEntry
+	Entries []TodoEntry
 }
