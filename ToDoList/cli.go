@@ -9,6 +9,12 @@ func Run() {
 		switch input {
 		case "a":
 			fmt.Println("Adding a new entry...")
+			fmt.Println()
+			entry := createEntry(fetchName())
+			AddEntry(entry)
+		case "l":
+			fmt.Println("Listing all entries...")
+			ListEntries()
 		case "e":
 			fmt.Println("Exiting...")
 			return
@@ -20,4 +26,10 @@ func fetchInput() (input string) {
 	fmt.Printf("Enter your input: ")
 	fmt.Scanln(&input)
 	return input
+}
+
+func fetchName() (name string) {
+	fmt.Printf("Enter the name of the entry: ")
+	fmt.Scanln(&name)
+	return name
 }
