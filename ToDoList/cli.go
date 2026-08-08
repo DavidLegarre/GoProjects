@@ -2,12 +2,13 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
+
 	"fmt"
 	"os"
 )
 
 func run() {
+	ReadDB()
 	for {
 		sc := bufio.NewScanner(os.Stdin)
 		input := fetch("Please enter a command (a: add, l: list, e: exit): ", sc)
@@ -38,13 +39,4 @@ func fetch(prompt string, sc *bufio.Scanner) string {
 	fmt.Print(prompt)
 	sc.Scan()
 	return sc.Text()
-}
-
-func UpdateDB() {
-	b, err := json.Marshal(Items)
-	if err != nil {
-		fmt.Println("Error marshalling list:", err)
-		return
-	}
-	writeJsonFile(b)
 }
