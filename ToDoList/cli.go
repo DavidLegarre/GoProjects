@@ -22,6 +22,8 @@ func Run() {
 		case "e":
 			fmt.Println("Exiting...")
 			return
+		default:
+			fmt.Println("Invalid input. Please try again.")
 		}
 	}
 }
