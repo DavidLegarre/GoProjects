@@ -2,7 +2,7 @@ package main
 
 import "os"
 
-const jsonFilePath = "./todolist.json"
+const jsonFilePath = "./ToDoList/todolist.json"
 
 func readJsonFile() {
 }
