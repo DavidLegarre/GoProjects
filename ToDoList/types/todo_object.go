@@ -1,8 +1,8 @@
 package types
 
 type TodoEntry struct {
-	Name        string
-	DoneStatues bool
+	Name       string
+	DoneStatus bool
 }
 
 type TodoList struct {
