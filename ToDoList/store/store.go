@@ -1,10 +1,13 @@
 package store
 
 import (
+	"errors"
 	"fmt"
 	"slices"
 	"todolist/types"
 )
+
+var ErrNotFound = errors.New("entry not found")
 
 type ItemStore struct {
 	items types.TodoList
@@ -29,6 +32,7 @@ func (s *ItemStore) RemoveEntryByName(name string) error {
 			return nil
 		}
 	}
+
 	return ErrNotFound
 }
 

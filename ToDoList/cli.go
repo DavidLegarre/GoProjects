@@ -80,13 +80,18 @@ func cmdAdd(args *CommandArguments) {
 func cmdRemove(args *CommandArguments) {
 	args.itemStore.PrintEntries()
 	name := fetch("Enter the name of the entry to remove: ", args.scanner)
-	if args.itemStore.RemoveEntryByName(name) {
-		fmt.Printf("Entry '%s' removed successfully.\n", name)
-		err := args.itemStore.Save()
-		if err != nil {
-			fmt.Println("Error storing changes to the DB", err)
-		}
+
+	err := args.itemStore.RemoveEntryByName(name)
+	if err != nil {
+		fmt.Printf("Error removing %q: %v\n", name, err)
+		return
 	}
+	fmt.Printf("Entry '%s' removed successfully.\n", name)
+	err = args.itemStore.Save()
+	if err != nil {
+		fmt.Println("Error storing changes to the DB", err)
+	}
+
 }
 
 func cmdList(args *CommandArguments) {
