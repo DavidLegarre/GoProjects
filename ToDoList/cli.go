@@ -20,8 +20,11 @@ var commands = map[string]func(*CommandArguments){
 
 func run() {
 
-	itemStore := store.ItemStore{}
-	store.ReadDB()
+	itemStore := store.ReadDB()
+	if itemStore == nil {
+		fmt.Println("Failed to read the database. Exiting.")
+		return
+	}
 	sc := bufio.NewScanner(os.Stdin)
 	for {
 		input := fetch("Enter command (a=add, r=remove, l=list, e=exit): ", sc)
@@ -36,7 +39,7 @@ func run() {
 		}
 		arguments := &CommandArguments{
 			scanner:   sc,
-			itemStore: &itemStore,
+			itemStore: itemStore,
 		}
 		command(arguments)
 	}

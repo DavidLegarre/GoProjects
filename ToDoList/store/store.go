@@ -53,21 +53,21 @@ func (s *ItemStore) PrintEntries() {
 	fmt.Println()
 }
 
-func ReadDB() {
+func ReadDB() *ItemStore {
 	data := readJsonFile()
 	if data == nil {
 		fmt.Println("Error reading JSON file.")
-		return
+		return nil
 	}
 
 	var todoList types.TodoList
 	err := json.Unmarshal(data, &todoList)
 	if err != nil {
 		fmt.Println("Error unmarshalling JSON:", err)
-		return
+		return nil
 	}
-	
-	Items = todoList
+
+	return &ItemStore{items: todoList}
 }
 
 func WriteDB() {
