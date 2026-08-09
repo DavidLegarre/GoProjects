@@ -1,6 +1,7 @@
 package store
 
 import (
+	"fmt"
 	"os"
 )
 
@@ -14,6 +15,8 @@ func readJsonFile() ([]byte, error) {
 	return data, nil
 }
 
-func writeJsonFile(data []byte) {
-	os.WriteFile(jsonFilePath, data, 0644)
+func writeJsonFile(data []byte) error {
+	err := os.WriteFile(jsonFilePath, data, 0644)
+	err = fmt.Errorf("Error occured while writing to JsonFile %s: %w", jsonFilePath, err)
+	return err
 }

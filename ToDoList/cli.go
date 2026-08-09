@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"os"
 	"todolist/store"
@@ -26,9 +27,15 @@ func run() {
 func loadStore() *store.ItemStore {
 	itemStore, err := store.ReadDB()
 
-	if err == nil {
+	if err != nil {
 		fmt.Println("Database empty, building new DB...")
-		itemStore = store.NewItemStore()
+		if errors.Is(err, os.ErrNotExist) {
+			itemStore = store.NewItemStore()
+		} else {
+			fmt.Printf("Unexpected error occured %s", err)
+			fmt.Println("Exiting...")
+			os.Exit(-1)
+		}
 	}
 
 	return itemStore
