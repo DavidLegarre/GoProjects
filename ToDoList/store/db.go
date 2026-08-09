@@ -27,11 +27,11 @@ func ReadDB() (*ItemStore, error) {
 	return &ItemStore{items: todoList}, nil
 }
 
-func WriteDB(itemStore *ItemStore) {
+func WriteDB(itemStore *ItemStore) error {
 	b, err := json.Marshal(itemStore.GetEntries())
 	if err != nil {
 		fmt.Println("Error marshalling list:", err)
-		return
+		return err
 	}
-	writeJsonFile(b)
+	return writeJsonFile(b)
 }
