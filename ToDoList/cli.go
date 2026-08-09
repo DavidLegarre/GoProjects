@@ -60,13 +60,9 @@ func cmdAdd(args *CommandArguments) {
 func cmdRemove(args *CommandArguments) {
 	args.itemStore.GetEntries()
 	name := fetch("Enter the name of the entry to remove: ", args.scanner)
-	entry := args.itemStore.SearchEntryByName(name)
-	if entry != nil {
-		args.itemStore.RemoveEntry(entry)
+	if args.itemStore.RemoveEntryByName(name) {
+		fmt.Printf("Entry '%s' removed successfully.\n", name)
 		store.WriteDB()
-		fmt.Printf("Entry '%s' removed\n", name)
-	} else {
-		fmt.Println("Entry not found.")
 	}
 }
 

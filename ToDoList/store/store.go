@@ -1,7 +1,6 @@
 package store
 
 import (
-	"encoding/json"
 	"fmt"
 	"slices"
 	"todolist/types"
@@ -31,6 +30,18 @@ func (s *ItemStore) RemoveEntry(entry *types.TodoEntry) {
 	}
 }
 
+func (s *ItemStore) RemoveEntryByName(name string) bool {
+	for i, e := range s.items.Entries {
+		if e.Name == name {
+			s.items.Entries = slices.Delete(s.items.Entries, i, i+1)
+			return true
+		}
+	}
+	fmt.Printf("Entry with name '%s' not found.\n", name)
+
+	return false
+}
+
 func (s *ItemStore) GetEntries() []types.TodoEntry {
 	return s.items.Entries
 }
@@ -51,44 +62,4 @@ func (s *ItemStore) PrintEntries() {
 		fmt.Println(entry.Name)
 	}
 	fmt.Println()
-}
-
-func ReadDB() *ItemStore {
-	data := readJsonFile()
-	if data == nil {
-		fmt.Println("Error reading JSON file.")
-		return nil
-	}
-
-	var todoList types.TodoList
-	err := json.Unmarshal(data, &todoList)
-	if err != nil {
-		fmt.Println("Error unmarshalling JSON:", err)
-		return nil
-	}
-
-	return &ItemStore{items: todoList}
-}
-
-func WriteDB() {
-	b, err := json.Marshal(Items)
-	if err != nil {
-		fmt.Println("Error marshalling list:", err)
-		return
-	}
-	writeJsonFile(b)
-}
-
-func DeleteDB() {
-	Items = types.TodoList{Entries: []types.TodoEntry{}}
-	WriteDB()
-}
-
-func SearchEntryByName(name string) *types.TodoEntry {
-	for _, entry := range Items.Entries {
-		if entry.Name == name {
-			return &entry
-		}
-	}
-	return nil
 }
