@@ -22,16 +22,14 @@ func (s *ItemStore) AddEntry(entry types.TodoEntry) {
 	s.items.Entries = append(s.items.Entries, entry)
 }
 
-func (s *ItemStore) RemoveEntryByName(name string) bool {
+func (s *ItemStore) RemoveEntryByName(name string) error {
 	for i, e := range s.items.Entries {
 		if e.Name == name {
 			s.items.Entries = slices.Delete(s.items.Entries, i, i+1)
-			return true
+			return nil
 		}
 	}
-	fmt.Printf("Entry with name '%s' not found.\n", name)
-
-	return false
+	return ErrNotFound
 }
 
 func (s *ItemStore) GetEntries() types.TodoList {
@@ -56,6 +54,6 @@ func (s *ItemStore) PrintEntries() {
 	fmt.Println()
 }
 
-func (s *ItemStore) Save() error{
+func (s *ItemStore) Save() error {
 	return WriteDB(s)
 }

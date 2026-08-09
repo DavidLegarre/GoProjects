@@ -17,6 +17,8 @@ func readJsonFile() ([]byte, error) {
 
 func writeJsonFile(data []byte) error {
 	err := os.WriteFile(jsonFilePath, data, 0644)
-	err = fmt.Errorf("Error occured while writing to JsonFile %s: %w", jsonFilePath, err)
+	if err != nil {
+		err = fmt.Errorf("Error occured while writing to JsonFile %s: %w", jsonFilePath, err)
+	}
 	return err
 }
