@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"todolist/types"
 )
 
@@ -84,4 +85,13 @@ func DeleteFromDB(entry types.TodoEntry) {
 func DeleteDB() {
 	Items = types.TodoList{Entries: []types.TodoEntry{}}
 	WriteDB()
+}
+
+func RemoveEntryByName(name string) {
+	for i, entry := range Items.Entries {
+		if entry.Name == name {
+			Items.Entries = slices.Delete(Items.Entries, i, i+1)
+			return
+		}
+	}
 }

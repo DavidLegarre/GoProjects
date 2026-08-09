@@ -22,6 +22,9 @@ func run() {
 		case "r":
 			fmt.Println("Removing an entry...")
 			fmt.Println()
+			ListEntries()
+			name := fetch("Enter the name of the entry to remove: ", sc)
+			RemoveEntryByName(name)
 			WriteDB()
 		case "l":
 			fmt.Println("Listing all entries...")
