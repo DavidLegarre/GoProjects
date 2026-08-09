@@ -56,6 +56,6 @@ func (s *ItemStore) PrintEntries() {
 	fmt.Println()
 }
 
-func (s *ItemStore) Save() {
-	WriteDB(s)
+func (s *ItemStore) Save() error{
+	return WriteDB(s)
 }

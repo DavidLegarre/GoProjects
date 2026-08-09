@@ -71,7 +71,10 @@ func fetch(prompt string, sc *bufio.Scanner) string {
 func cmdAdd(args *CommandArguments) {
 	entry := store.CreateEntry(fetch("Enter the name of the new entry: ", args.scanner))
 	args.itemStore.AddEntry(entry)
-	args.itemStore.Save()
+	err := args.itemStore.Save()
+	if err != nil {
+		fmt.Println("Error storing changes to the DB", err)
+	}
 }
 
 func cmdRemove(args *CommandArguments) {
@@ -79,7 +82,10 @@ func cmdRemove(args *CommandArguments) {
 	name := fetch("Enter the name of the entry to remove: ", args.scanner)
 	if args.itemStore.RemoveEntryByName(name) {
 		fmt.Printf("Entry '%s' removed successfully.\n", name)
-		args.itemStore.Save()
+		err := args.itemStore.Save()
+		if err != nil {
+			fmt.Println("Error storing changes to the DB", err)
+		}
 	}
 }
 
