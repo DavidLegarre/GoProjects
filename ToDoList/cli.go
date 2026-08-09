@@ -19,8 +19,22 @@ var commands = map[string]func(*CommandArguments){
 }
 
 func run() {
+	itemStore := loadStore()
+	loop(itemStore)
+}
 
-	itemStore := initStore()
+func loadStore() *store.ItemStore {
+	itemStore, err := store.ReadDB()
+
+	if err == nil {
+		fmt.Println("Database empty, building new DB...")
+		itemStore = store.NewItemStore()
+	}
+
+	return itemStore
+}
+
+func loop(itemStore *store.ItemStore) {
 	sc := bufio.NewScanner(os.Stdin)
 	for {
 		input := fetch("Enter command (a=add, r=remove, l=list, e=exit): ", sc)
@@ -39,18 +53,6 @@ func run() {
 		}
 		command(arguments)
 	}
-}
-
-func initStore() *store.ItemStore {
-	var itemStore *store.ItemStore
-	itemStore = store.ReadDB()
-
-	if itemStore == nil {
-		fmt.Println("Database empty, building new DB...")
-		itemStore = store.NewItemStore()
-	}
-
-	return itemStore
 }
 
 func fetch(prompt string, sc *bufio.Scanner) string {

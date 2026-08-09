@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -29,9 +30,12 @@ func TestReadDB_Valid(t *testing.T) {
 	chdirTemp(t)
 	writeTestFile(t, `{"Entries":[{"Name":"alpha","DoneStatus":false}]}`)
 
-	s := ReadDB()
+	s, err := ReadDB()
+	if err != nil {
+		t.Fatalf("ReadDB returned unexpected error: %v", err)
+	}
 	if s == nil {
-		t.Fatal("ReadDB returned nil for a valid file")
+		t.Fatal("ReadDB returned a nil store")
 	}
 	entries := s.GetEntries().Entries
 	if len(entries) != 1 || entries[0].Name != "alpha" {
@@ -42,8 +46,9 @@ func TestReadDB_Valid(t *testing.T) {
 func TestReadDB_FileNotFound(t *testing.T) {
 	chdirTemp(t)
 
-	if s := ReadDB(); s != nil {
-		t.Errorf("ReadDB = %v, want nil for a missing file", s)
+	_, err := ReadDB()
+	if !errors.Is(err, os.ErrNotExist) {
+		t.Errorf("expected os.ErrNotExist, got %v", err)
 	}
 }
 
@@ -51,8 +56,27 @@ func TestReadDB_InvalidJSON(t *testing.T) {
 	chdirTemp(t)
 	writeTestFile(t, `this is not json`)
 
-	if s := ReadDB(); s != nil {
-		t.Errorf("ReadDB = %v, want nil for invalid json", s)
+	_, err := ReadDB()
+	if err == nil {
+		t.Fatal("expected an error for invalid json")
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		t.Errorf("invalid json must not be a not-exist error, got %v", err)
+	}
+}
+
+func TestReadDB_PathIsDirectory(t *testing.T) {
+	chdirTemp(t)
+	if err := os.Mkdir(testFile, 0o755); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := ReadDB()
+	if err == nil {
+		t.Fatal("expected an error when the path is a directory")
+	}
+	if errors.Is(err, os.ErrNotExist) {
+		t.Errorf("a directory must not be a not-exist error, got %v", err)
 	}
 }
 
@@ -79,9 +103,12 @@ func TestRoundTrip(t *testing.T) {
 	s.AddEntry(CreateEntry("beta"))
 	s.Save()
 
-	loaded := ReadDB()
+	loaded, err := ReadDB()
+	if err != nil {
+		t.Fatalf("ReadDB returned unexpected error: %v", err)
+	}
 	if loaded == nil {
-		t.Fatal("ReadDB returned nil after a successful Save")
+		t.Fatal("ReadDB returned a nil store")
 	}
 	entries := loaded.GetEntries().Entries
 	if len(entries) != 2 {
