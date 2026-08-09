@@ -73,6 +73,15 @@ func DeleteDB() {
 	WriteDB()
 }
 
+func RemoveEntry(entry *types.TodoEntry) {
+	for i, e := range Items.Entries {
+		if e.Name == entry.Name {
+			Items.Entries = slices.Delete(Items.Entries, i, i+1)
+			return
+		}
+	}
+}
+
 func RemoveEntryByName(name string) {
 	for i, entry := range Items.Entries {
 		if entry.Name == name {

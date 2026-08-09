@@ -46,8 +46,14 @@ func cmdAdd(sc *bufio.Scanner) {
 func cmdRemove(sc *bufio.Scanner) {
 	PrintEntries()
 	name := fetch("Enter the name of the entry to remove: ", sc)
-	RemoveEntryByName(name)
-	WriteDB()
+	entry := SearchEntryByName(name)
+	if entry != nil {
+		RemoveEntry(entry)
+		WriteDB()
+		fmt.Printf("Entry '%s' removed\n", name)
+	} else {
+		fmt.Println("Entry not found.")
+	}
 }
 
 func cmdList(_ *bufio.Scanner) {
