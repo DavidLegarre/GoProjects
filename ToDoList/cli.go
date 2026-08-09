@@ -50,6 +50,6 @@ func cmdRemove(sc *bufio.Scanner) {
 	WriteDB()
 }
 
-func cmdList(sc *bufio.Scanner) {
+func cmdList(_ *bufio.Scanner) {
 	PrintEntries()
 }
