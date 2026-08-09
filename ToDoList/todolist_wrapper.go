@@ -81,3 +81,12 @@ func RemoveEntryByName(name string) {
 		}
 	}
 }
+
+func SearchEntryByName(name string) *types.TodoEntry {
+	for _, entry := range Items.Entries {
+		if entry.Name == name {
+			return &entry
+		}
+	}
+	return nil
+}
