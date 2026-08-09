@@ -20,11 +20,7 @@ var commands = map[string]func(*CommandArguments){
 
 func run() {
 
-	itemStore := store.ReadDB()
-	if itemStore == nil {
-		fmt.Println("Failed to read the database. Exiting.")
-		return
-	}
+	itemStore := initStore()
 	sc := bufio.NewScanner(os.Stdin)
 	for {
 		input := fetch("Enter command (a=add, r=remove, l=list, e=exit): ", sc)
@@ -45,6 +41,18 @@ func run() {
 	}
 }
 
+func initStore() *store.ItemStore {
+	var itemStore *store.ItemStore
+	itemStore = store.ReadDB()
+
+	if itemStore == nil {
+		fmt.Println("Database empty, building new DB...")
+		itemStore = store.NewItemStore()
+	}
+
+	return itemStore
+}
+
 func fetch(prompt string, sc *bufio.Scanner) string {
 	fmt.Print(prompt)
 	sc.Scan()
@@ -54,15 +62,15 @@ func fetch(prompt string, sc *bufio.Scanner) string {
 func cmdAdd(args *CommandArguments) {
 	entry := store.CreateEntry(fetch("Enter the name of the new entry: ", args.scanner))
 	args.itemStore.AddEntry(entry)
-	store.WriteDB()
+	args.itemStore.Save()
 }
 
 func cmdRemove(args *CommandArguments) {
-	args.itemStore.GetEntries()
+	args.itemStore.PrintEntries()
 	name := fetch("Enter the name of the entry to remove: ", args.scanner)
 	if args.itemStore.RemoveEntryByName(name) {
 		fmt.Printf("Entry '%s' removed successfully.\n", name)
-		store.WriteDB()
+		args.itemStore.Save()
 	}
 }
 

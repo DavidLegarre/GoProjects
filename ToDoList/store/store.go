@@ -6,11 +6,12 @@ import (
 	"todolist/types"
 )
 
-var sampleEntry types.TodoEntry = types.TodoEntry{Name: "Sample Entry"}
-var Items types.TodoList = types.TodoList{Entries: []types.TodoEntry{sampleEntry}}
-
 type ItemStore struct {
 	items types.TodoList
+}
+
+func NewItemStore() *ItemStore {
+	return &ItemStore{items: types.TodoList{Entries: nil}}
 }
 
 func CreateEntry(name string) types.TodoEntry {
@@ -19,15 +20,6 @@ func CreateEntry(name string) types.TodoEntry {
 
 func (s *ItemStore) AddEntry(entry types.TodoEntry) {
 	s.items.Entries = append(s.items.Entries, entry)
-}
-
-func (s *ItemStore) RemoveEntry(entry *types.TodoEntry) {
-	for i, e := range s.items.Entries {
-		if e.Name == entry.Name {
-			s.items.Entries = slices.Delete(s.items.Entries, i, i+1)
-			return
-		}
-	}
 }
 
 func (s *ItemStore) RemoveEntryByName(name string) bool {
@@ -42,8 +34,8 @@ func (s *ItemStore) RemoveEntryByName(name string) bool {
 	return false
 }
 
-func (s *ItemStore) GetEntries() []types.TodoEntry {
-	return s.items.Entries
+func (s *ItemStore) GetEntries() types.TodoList {
+	return s.items
 }
 
 func (s *ItemStore) SearchEntryByName(name string) *types.TodoEntry {
@@ -62,4 +54,8 @@ func (s *ItemStore) PrintEntries() {
 		fmt.Println(entry.Name)
 	}
 	fmt.Println()
+}
+
+func (s *ItemStore) Save() {
+	WriteDB(s)
 }

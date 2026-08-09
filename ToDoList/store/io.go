@@ -1,15 +1,17 @@
 package store
 
-import "os"
+import (
+	"os"
+)
 
 const jsonFilePath = "./ToDoList/todolist.json"
 
-func readJsonFile() []byte {
+func readJsonFile() ([]byte, error) {
 	data, err := os.ReadFile(jsonFilePath)
 	if err != nil {
-		return nil
+		return data, err
 	}
-	return data
+	return data, nil
 }
 
 func writeJsonFile(data []byte) {
