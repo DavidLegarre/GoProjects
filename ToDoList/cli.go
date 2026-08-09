@@ -19,26 +19,31 @@ var commands = map[string]func(*CommandArguments){
 	"l": cmdList,
 }
 
-func run() {
-	itemStore := loadStore()
+func run() error {
+	itemStore, err := loadStore()
+	if err != nil {
+		return err
+	}
 	loop(itemStore)
+
+	return nil
 }
 
-func loadStore() *store.ItemStore {
+func loadStore() (*store.ItemStore, error) {
 	itemStore, err := store.ReadDB()
 
 	if err != nil {
-		fmt.Println("Database empty, building new DB...")
 		if errors.Is(err, os.ErrNotExist) {
+			fmt.Println("Database empty, building new DB...")
 			itemStore = store.NewItemStore()
 		} else {
 			fmt.Printf("Unexpected error occured %s", err)
 			fmt.Println("Exiting...")
-			os.Exit(-1)
+			return nil, err
 		}
 	}
 
-	return itemStore
+	return itemStore, nil
 }
 
 func loop(itemStore *store.ItemStore) {

@@ -2,7 +2,6 @@ package store
 
 import (
 	"encoding/json"
-	"fmt"
 	"todolist/types"
 )
 
@@ -24,7 +23,6 @@ func ReadDB() (*ItemStore, error) {
 func WriteDB(itemStore *ItemStore) error {
 	b, err := json.Marshal(itemStore.GetEntries())
 	if err != nil {
-		fmt.Println("Error marshalling list:", err)
 		return err
 	}
 	return writeJsonFile(b)
