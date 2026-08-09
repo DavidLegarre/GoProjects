@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"todolist/store"
 )
 
 var commands = map[string]func(*bufio.Scanner){
@@ -14,7 +15,7 @@ var commands = map[string]func(*bufio.Scanner){
 
 func run() {
 
-	ReadDB()
+	store.ReadDB()
 	sc := bufio.NewScanner(os.Stdin)
 	for {
 		input := fetch("Enter command (a=add, r=remove, l=list, e=exit): ", sc)
@@ -38,18 +39,18 @@ func fetch(prompt string, sc *bufio.Scanner) string {
 }
 
 func cmdAdd(sc *bufio.Scanner) {
-	entry := createEntry(fetch("Enter the name of the new entry: ", sc))
-	AddEntry(entry)
-	WriteDB()
+	entry := store.CreateEntry(fetch("Enter the name of the new entry: ", sc))
+	store.AddEntry(entry)
+	store.WriteDB()
 }
 
 func cmdRemove(sc *bufio.Scanner) {
-	PrintEntries()
+	store.PrintEntries()
 	name := fetch("Enter the name of the entry to remove: ", sc)
-	entry := SearchEntryByName(name)
+	entry := store.SearchEntryByName(name)
 	if entry != nil {
-		RemoveEntry(entry)
-		WriteDB()
+		store.RemoveEntry(entry)
+		store.WriteDB()
 		fmt.Printf("Entry '%s' removed\n", name)
 	} else {
 		fmt.Println("Entry not found.")
@@ -57,5 +58,5 @@ func cmdRemove(sc *bufio.Scanner) {
 }
 
 func cmdList(_ *bufio.Scanner) {
-	PrintEntries()
+	store.PrintEntries()
 }

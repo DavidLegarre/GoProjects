@@ -1,4 +1,4 @@
-package main
+package store
 
 import (
 	"encoding/json"
@@ -10,23 +10,12 @@ import (
 var sampleEntry types.TodoEntry = types.TodoEntry{Name: "Sample Entry"}
 var Items types.TodoList = types.TodoList{Entries: []types.TodoEntry{sampleEntry}}
 
-func createEntry(name string) types.TodoEntry {
+func CreateEntry(name string) types.TodoEntry {
 	return types.TodoEntry{Name: name}
 }
 
 func AddEntry(entry types.TodoEntry) {
 	Items.Entries = append(Items.Entries, entry)
-}
-
-func EntryToBytes(entry types.TodoEntry) []byte {
-	b, err := json.Marshal(entry)
-
-	if err != nil {
-		fmt.Println("Error marshalling entry:", err)
-		return nil
-	}
-
-	return b
 }
 
 func GetEntries() []types.TodoEntry {
