@@ -94,6 +94,9 @@ func TestWriteDB(t *testing.T) {
 	if string(data) != want {
 		t.Errorf("file content = %s, want %s", data, want)
 	}
+	if _, err := os.Stat(rootPath + "tmp"); !os.IsNotExist(err) {
+		t.Errorf("stale tmp file left behind: %v", err)
+	}
 }
 
 func TestRoundTrip(t *testing.T) {

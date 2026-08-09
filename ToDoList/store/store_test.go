@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"testing"
 )
 
@@ -34,16 +35,16 @@ func TestAddEntry(t *testing.T) {
 
 func TestRemoveEntryByName(t *testing.T) {
 	tests := []struct {
-		name      string
-		setup     []string
-		remove    string
-		wantFound bool
-		wantLeft  []string
+		name     string
+		setup    []string
+		remove   string
+		wantErr  error
+		wantLeft []string
 	}{
-		{name: "removes middle element", setup: []string{"a", "b", "c"}, remove: "b", wantFound: true, wantLeft: []string{"a", "c"}},
-		{name: "removes first element", setup: []string{"a", "b"}, remove: "a", wantFound: true, wantLeft: []string{"b"}},
-		{name: "removes only element", setup: []string{"a"}, remove: "a", wantFound: true, wantLeft: nil},
-		{name: "missing name is untouched", setup: []string{"a", "b"}, remove: "z", wantFound: false, wantLeft: []string{"a", "b"}},
+		{name: "removes middle element", setup: []string{"a", "b", "c"}, remove: "b", wantErr: nil, wantLeft: []string{"a", "c"}},
+		{name: "removes first element", setup: []string{"a", "b"}, remove: "a", wantErr: nil, wantLeft: []string{"b"}},
+		{name: "removes only element", setup: []string{"a"}, remove: "a", wantErr: nil, wantLeft: nil},
+		{name: "missing name is untouched", setup: []string{"a", "b"}, remove: "z", wantErr: ErrNotFound, wantLeft: []string{"a", "b"}},
 	}
 
 	for _, tt := range tests {
@@ -54,8 +55,8 @@ func TestRemoveEntryByName(t *testing.T) {
 			}
 
 			got := s.RemoveEntryByName(tt.remove)
-			if got != tt.wantFound {
-				t.Errorf("RemoveEntryByName(%q) = %v, want %v", tt.remove, got, tt.wantFound)
+			if !errors.Is(got, tt.wantErr) {
+				t.Errorf("RemoveEntryByName(%q) = %v, want %v", tt.remove, got, tt.wantErr)
 			}
 
 			left := s.GetEntries().Entries
