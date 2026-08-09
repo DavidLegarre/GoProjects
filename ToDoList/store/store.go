@@ -39,9 +39,9 @@ func (s *ItemStore) GetEntries() types.TodoList {
 }
 
 func (s *ItemStore) SearchEntryByName(name string) *types.TodoEntry {
-	for _, entry := range s.items.Entries {
-		if entry.Name == name {
-			return &entry
+	for i := range s.items.Entries {
+		if s.items.Entries[i].Name == name {
+			return &s.items.Entries[i]
 		}
 	}
 	return nil
