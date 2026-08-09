@@ -7,7 +7,12 @@ import (
 	"todolist/store"
 )
 
-var commands = map[string]func(*bufio.Scanner){
+type CommandArguments struct {
+	scanner   *bufio.Scanner
+	itemStore *store.ItemStore
+}
+
+var commands = map[string]func(*CommandArguments){
 	"a": cmdAdd,
 	"r": cmdRemove,
 	"l": cmdList,
@@ -15,6 +20,7 @@ var commands = map[string]func(*bufio.Scanner){
 
 func run() {
 
+	itemStore := store.ItemStore{}
 	store.ReadDB()
 	sc := bufio.NewScanner(os.Stdin)
 	for {
@@ -28,7 +34,11 @@ func run() {
 			fmt.Println("Invalid command. Please try again.")
 			continue
 		}
-		command(sc)
+		arguments := &CommandArguments{
+			scanner:   sc,
+			itemStore: &itemStore,
+		}
+		command(arguments)
 	}
 }
 
@@ -38,18 +48,18 @@ func fetch(prompt string, sc *bufio.Scanner) string {
 	return sc.Text()
 }
 
-func cmdAdd(sc *bufio.Scanner) {
-	entry := store.CreateEntry(fetch("Enter the name of the new entry: ", sc))
-	store.AddEntry(entry)
+func cmdAdd(args *CommandArguments) {
+	entry := store.CreateEntry(fetch("Enter the name of the new entry: ", args.scanner))
+	args.itemStore.AddEntry(entry)
 	store.WriteDB()
 }
 
-func cmdRemove(sc *bufio.Scanner) {
-	store.PrintEntries()
-	name := fetch("Enter the name of the entry to remove: ", sc)
-	entry := store.SearchEntryByName(name)
+func cmdRemove(args *CommandArguments) {
+	args.itemStore.GetEntries()
+	name := fetch("Enter the name of the entry to remove: ", args.scanner)
+	entry := args.itemStore.SearchEntryByName(name)
 	if entry != nil {
-		store.RemoveEntry(entry)
+		args.itemStore.RemoveEntry(entry)
 		store.WriteDB()
 		fmt.Printf("Entry '%s' removed\n", name)
 	} else {
@@ -57,6 +67,6 @@ func cmdRemove(sc *bufio.Scanner) {
 	}
 }
 
-func cmdList(_ *bufio.Scanner) {
-	store.PrintEntries()
+func cmdList(args *CommandArguments) {
+	args.itemStore.PrintEntries()
 }

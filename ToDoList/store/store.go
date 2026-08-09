@@ -10,22 +10,44 @@ import (
 var sampleEntry types.TodoEntry = types.TodoEntry{Name: "Sample Entry"}
 var Items types.TodoList = types.TodoList{Entries: []types.TodoEntry{sampleEntry}}
 
+type ItemStore struct {
+	items types.TodoList
+}
+
 func CreateEntry(name string) types.TodoEntry {
 	return types.TodoEntry{Name: name}
 }
 
-func AddEntry(entry types.TodoEntry) {
-	Items.Entries = append(Items.Entries, entry)
+func (s *ItemStore) AddEntry(entry types.TodoEntry) {
+	s.items.Entries = append(s.items.Entries, entry)
 }
 
-func GetEntries() []types.TodoEntry {
-	return Items.Entries
+func (s *ItemStore) RemoveEntry(entry *types.TodoEntry) {
+	for i, e := range s.items.Entries {
+		if e.Name == entry.Name {
+			s.items.Entries = slices.Delete(s.items.Entries, i, i+1)
+			return
+		}
+	}
 }
 
-func PrintEntries() {
+func (s *ItemStore) GetEntries() []types.TodoEntry {
+	return s.items.Entries
+}
+
+func (s *ItemStore) SearchEntryByName(name string) *types.TodoEntry {
+	for _, entry := range s.items.Entries {
+		if entry.Name == name {
+			return &entry
+		}
+	}
+	return nil
+}
+
+func (s *ItemStore) PrintEntries() {
 	fmt.Println("Current To-Do List:")
 	fmt.Println()
-	for _, entry := range Items.Entries {
+	for _, entry := range s.items.Entries {
 		fmt.Println(entry.Name)
 	}
 	fmt.Println()
@@ -44,7 +66,7 @@ func ReadDB() {
 		fmt.Println("Error unmarshalling JSON:", err)
 		return
 	}
-
+	
 	Items = todoList
 }
 
@@ -60,24 +82,6 @@ func WriteDB() {
 func DeleteDB() {
 	Items = types.TodoList{Entries: []types.TodoEntry{}}
 	WriteDB()
-}
-
-func RemoveEntry(entry *types.TodoEntry) {
-	for i, e := range Items.Entries {
-		if e.Name == entry.Name {
-			Items.Entries = slices.Delete(Items.Entries, i, i+1)
-			return
-		}
-	}
-}
-
-func RemoveEntryByName(name string) {
-	for i, entry := range Items.Entries {
-		if entry.Name == name {
-			Items.Entries = slices.Delete(Items.Entries, i, i+1)
-			return
-		}
-	}
 }
 
 func SearchEntryByName(name string) *types.TodoEntry {
