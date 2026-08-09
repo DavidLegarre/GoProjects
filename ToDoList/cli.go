@@ -2,39 +2,32 @@ package main
 
 import (
 	"bufio"
-
 	"fmt"
 	"os"
 )
 
+var commands = map[string]func(*bufio.Scanner){
+	"a": cmdAdd,
+	"r": cmdRemove,
+	"l": cmdList,
+}
+
 func run() {
+
 	ReadDB()
+	sc := bufio.NewScanner(os.Stdin)
 	for {
-		sc := bufio.NewScanner(os.Stdin)
-		input := fetch("Please enter a command (a: add, l: list, e: exit): ", sc)
-		switch input {
-		case "a":
-			fmt.Println("Adding a new entry...")
-			fmt.Println()
-			entry := createEntry(fetch("Enter the name of the new entry: ", sc))
-			AddEntry(entry)
-			WriteDB()
-		case "r":
-			fmt.Println("Removing an entry...")
-			fmt.Println()
-			ListEntries()
-			name := fetch("Enter the name of the entry to remove: ", sc)
-			RemoveEntryByName(name)
-			WriteDB()
-		case "l":
-			fmt.Println("Listing all entries...")
-			ListEntries()
-		case "e":
-			fmt.Println("Exiting...")
+		input := fetch("Enter command (a=add, r=remove, l=list, e=exit): ", sc)
+		if input == "e" {
 			return
-		default:
-			fmt.Println("Invalid input. Please try again.")
 		}
+
+		command, ok := commands[input]
+		if !ok {
+			fmt.Println("Invalid command. Please try again.")
+			continue
+		}
+		command(sc)
 	}
 }
 
@@ -42,4 +35,21 @@ func fetch(prompt string, sc *bufio.Scanner) string {
 	fmt.Print(prompt)
 	sc.Scan()
 	return sc.Text()
+}
+
+func cmdAdd(sc *bufio.Scanner) {
+	entry := createEntry(fetch("Enter the name of the new entry: ", sc))
+	AddEntry(entry)
+	WriteDB()
+}
+
+func cmdRemove(sc *bufio.Scanner) {
+	PrintEntries()
+	name := fetch("Enter the name of the entry to remove: ", sc)
+	RemoveEntryByName(name)
+	WriteDB()
+}
+
+func cmdList(sc *bufio.Scanner) {
+	PrintEntries()
 }

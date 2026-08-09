@@ -29,20 +29,11 @@ func EntryToBytes(entry types.TodoEntry) []byte {
 	return b
 }
 
-func RemoveEntry(entry types.TodoEntry) {
-	for i, e := range Items.Entries {
-		if e == entry {
-			Items.Entries = append(Items.Entries[:i], Items.Entries[i+1:]...)
-			break
-		}
-	}
-}
-
 func GetEntries() []types.TodoEntry {
 	return Items.Entries
 }
 
-func ListEntries() {
+func PrintEntries() {
 	fmt.Println("Current To-Do List:")
 	fmt.Println()
 	for _, entry := range Items.Entries {
@@ -75,11 +66,6 @@ func WriteDB() {
 		return
 	}
 	writeJsonFile(b)
-}
-
-func DeleteFromDB(entry types.TodoEntry) {
-	RemoveEntry(entry)
-	WriteDB()
 }
 
 func DeleteDB() {
