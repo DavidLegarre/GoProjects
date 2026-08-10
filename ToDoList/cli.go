@@ -37,8 +37,7 @@ func loadStore() (*store.ItemStore, error) {
 			fmt.Println("Database empty, building new DB...")
 			itemStore = store.NewItemStore()
 		} else {
-			fmt.Printf("Unexpected error occured %s", err)
-			fmt.Println("Exiting...")
+			err = fmt.Errorf("Unexpected error reading from DB: %w", err)
 			return nil, err
 		}
 	}
