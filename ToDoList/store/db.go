@@ -5,8 +5,8 @@ import (
 	"todolist/types"
 )
 
-func ReadDB() (*ItemStore, error) {
-	data, err := readJsonFile()
+func ReadDB(path string) (*ItemStore, error) {
+	data, err := readJsonFile(path)
 	if err != nil {
 		return nil, err
 	}
@@ -17,7 +17,7 @@ func ReadDB() (*ItemStore, error) {
 		return nil, err
 	}
 
-	return &ItemStore{items: todoList}, nil
+	return &ItemStore{items: todoList, path: path}, nil
 }
 
 func WriteDB(itemStore *ItemStore) error {
@@ -25,5 +25,5 @@ func WriteDB(itemStore *ItemStore) error {
 	if err != nil {
 		return err
 	}
-	return writeJsonFile(b)
+	return writeJsonFile(itemStore.path, b)
 }

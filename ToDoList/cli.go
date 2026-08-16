@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"strings"
 	"todolist/store"
 )
 
@@ -20,6 +22,16 @@ var commands = map[string]func(args *CommandArguments) error{
 	"l": cmdList,
 }
 
+func getDefaultDataPath() (string, error) {
+	defaultDataPath, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	defaultDataPath = filepath.Join(defaultDataPath, "TodoList.json")
+	return defaultDataPath, nil
+}
+
 func run() error {
 	itemStore, err := loadStore()
 	if err != nil {
@@ -31,12 +43,17 @@ func run() error {
 }
 
 func loadStore() (*store.ItemStore, error) {
-	itemStore, err := store.ReadDB()
+	dataPath, err := getDefaultDataPath()
+	if err != nil {
+		fmt.Printf("Got an error trying to fetch the default path %q\n", err)
+		return nil, err
+	}
+	itemStore, err := store.ReadDB(dataPath)
 
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			fmt.Println("Database empty, building new DB...")
-			itemStore = store.NewItemStore()
+			itemStore = store.NewItemStore(dataPath)
 		} else {
 			err = fmt.Errorf("Unexpected error reading from DB: %w", err)
 			return nil, err
@@ -81,6 +98,17 @@ func fetch(prompt string, sc *bufio.Scanner) (string, error) {
 
 func cmdAdd(args *CommandArguments) error {
 	name, err := fetch("Enter the name of the new entry: ", args.scanner)
+	if err != nil {
+		fmt.Printf("Error adding %q: %v\n", name, err)
+		return err
+	}
+
+	name = strings.TrimSpace(name)
+	if name == "" {
+		fmt.Printf("No empty name allowed\n")
+		return nil
+	}
+
 	entry := store.CreateEntry(name)
 	args.itemStore.AddEntry(entry)
 	err = args.itemStore.Save()
@@ -99,13 +127,21 @@ func cmdRemove(args *CommandArguments) error {
 		return err
 	}
 
+	name = strings.TrimSpace(name)
+	if name == "" {
+		fmt.Println("No name input")
+		return nil
+	}
+
 	err = args.itemStore.RemoveEntryByName(name)
 	if err != nil {
 		fmt.Printf("Error removing %q: %v\n", name, err)
 		return err
 	}
+
 	fmt.Printf("Entry '%s' removed successfully.\n", name)
 	err = args.itemStore.Save()
+
 	if err != nil {
 		fmt.Println("Error storing changes to the DB", err)
 		return err

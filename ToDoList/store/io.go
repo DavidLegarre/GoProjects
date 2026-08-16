@@ -3,23 +3,18 @@ package store
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
-const rootPath = "./ToDoList/"
-const jsonFilePath = rootPath + "todolist.json"
-
-func readJsonFile() ([]byte, error) {
-	data, err := os.ReadFile(jsonFilePath)
-	if err != nil {
-		return data, err
-	}
-	return data, nil
+func readJsonFile(path string) ([]byte, error) {
+	return os.ReadFile(path)
 }
 
-func writeJsonFile(data []byte) error {
-	tmpFile, err := os.CreateTemp(rootPath, "tmp.*.json")
+func writeJsonFile(path string, data []byte) error {
+	tmpFile, err := os.CreateTemp(filepath.Dir(path), "tmp.*.json")
+	dataFile := filepath.Base(path)
 	if err != nil {
-		err = fmt.Errorf("Error occurred while writing to JsonFile %s: %w", jsonFilePath, err)
+		err = fmt.Errorf("Error occurred while writing to JsonFile %s: %w", dataFile, err)
 		return err
 	}
 	tmpPath := tmpFile.Name()
@@ -35,8 +30,8 @@ func writeJsonFile(data []byte) error {
 	if err := tmpFile.Sync(); err != nil {
 		return fmt.Errorf("sync temp file: %w", err)
 	}
-	if err := os.Rename(tmpPath, jsonFilePath); err != nil {
-		return fmt.Errorf("rename to %s: %w", jsonFilePath, err)
+	if err := os.Rename(tmpPath, path); err != nil {
+		return fmt.Errorf("rename to %s: %w", dataFile, err)
 	}
 	return nil
 }

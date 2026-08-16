@@ -6,7 +6,7 @@ import (
 )
 
 func TestNewItemStore(t *testing.T) {
-	s := NewItemStore()
+	s := NewItemStore("")
 	if s == nil {
 		t.Fatal("NewItemStore returned nil")
 	}
@@ -16,7 +16,7 @@ func TestNewItemStore(t *testing.T) {
 }
 
 func TestAddEntry(t *testing.T) {
-	s := NewItemStore()
+	s := NewItemStore("")
 	names := []string{"first", "second", "third"}
 	for _, name := range names {
 		s.AddEntry(CreateEntry(name))
@@ -44,12 +44,13 @@ func TestRemoveEntryByName(t *testing.T) {
 		{name: "removes middle element", setup: []string{"a", "b", "c"}, remove: "b", wantErr: nil, wantLeft: []string{"a", "c"}},
 		{name: "removes first element", setup: []string{"a", "b"}, remove: "a", wantErr: nil, wantLeft: []string{"b"}},
 		{name: "removes only element", setup: []string{"a"}, remove: "a", wantErr: nil, wantLeft: nil},
+		{name: "removes all duplicates", setup: []string{"a", "b", "b"}, remove: "b", wantErr: nil, wantLeft: []string{"a"}},
 		{name: "missing name is untouched", setup: []string{"a", "b"}, remove: "z", wantErr: ErrNotFound, wantLeft: []string{"a", "b"}},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := NewItemStore()
+			s := NewItemStore("")
 			for _, n := range tt.setup {
 				s.AddEntry(CreateEntry(n))
 			}
@@ -83,7 +84,7 @@ func TestCreateEntry(t *testing.T) {
 }
 
 func TestSearchEntryByName(t *testing.T) {
-	s := NewItemStore()
+	s := NewItemStore("")
 	s.AddEntry(CreateEntry("alpha"))
 	s.AddEntry(CreateEntry("beta"))
 

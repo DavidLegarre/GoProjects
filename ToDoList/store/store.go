@@ -11,10 +11,11 @@ var ErrNotFound = errors.New("entry not found")
 
 type ItemStore struct {
 	items types.TodoList
+	path  string
 }
 
-func NewItemStore() *ItemStore {
-	return &ItemStore{items: types.TodoList{Entries: nil}}
+func NewItemStore(path string) *ItemStore {
+	return &ItemStore{items: types.TodoList{Entries: nil}, path: path}
 }
 
 func CreateEntry(name string) types.TodoEntry {
@@ -26,14 +27,15 @@ func (s *ItemStore) AddEntry(entry types.TodoEntry) {
 }
 
 func (s *ItemStore) RemoveEntryByName(name string) error {
-	for i, e := range s.items.Entries {
-		if e.Name == name {
-			s.items.Entries = slices.Delete(s.items.Entries, i, i+1)
-			return nil
-		}
+	ogLen := len(s.items.Entries)
+	s.items.Entries = slices.DeleteFunc(s.items.Entries, func(entry types.TodoEntry) bool {
+		return entry.Name == name
+	})
+	if len(s.items.Entries) != ogLen {
+		return nil
+	} else {
+		return ErrNotFound
 	}
-
-	return ErrNotFound
 }
 
 func (s *ItemStore) GetEntries() types.TodoList {

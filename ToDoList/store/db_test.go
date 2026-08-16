@@ -30,7 +30,7 @@ func TestReadDB_Valid(t *testing.T) {
 	chdirTemp(t)
 	writeTestFile(t, `{"Entries":[{"Name":"alpha","DoneStatus":false}]}`)
 
-	s, err := ReadDB()
+	s, err := ReadDB(testFile)
 	if err != nil {
 		t.Fatalf("ReadDB returned unexpected error: %v", err)
 	}
@@ -46,7 +46,7 @@ func TestReadDB_Valid(t *testing.T) {
 func TestReadDB_FileNotFound(t *testing.T) {
 	chdirTemp(t)
 
-	_, err := ReadDB()
+	_, err := ReadDB(testFile)
 	if !errors.Is(err, os.ErrNotExist) {
 		t.Errorf("expected os.ErrNotExist, got %v", err)
 	}
@@ -56,7 +56,7 @@ func TestReadDB_InvalidJSON(t *testing.T) {
 	chdirTemp(t)
 	writeTestFile(t, `this is not json`)
 
-	_, err := ReadDB()
+	_, err := ReadDB(testFile)
 	if err == nil {
 		t.Fatal("expected an error for invalid json")
 	}
@@ -71,7 +71,7 @@ func TestReadDB_PathIsDirectory(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err := ReadDB()
+	_, err := ReadDB(testFile)
 	if err == nil {
 		t.Fatal("expected an error when the path is a directory")
 	}
@@ -82,7 +82,7 @@ func TestReadDB_PathIsDirectory(t *testing.T) {
 
 func TestWriteDB(t *testing.T) {
 	chdirTemp(t)
-	s := NewItemStore()
+	s := NewItemStore(testFile)
 	s.AddEntry(CreateEntry("gamma"))
 	s.Save()
 
@@ -94,19 +94,20 @@ func TestWriteDB(t *testing.T) {
 	if string(data) != want {
 		t.Errorf("file content = %s, want %s", data, want)
 	}
-	if _, err := os.Stat(rootPath + "tmp"); !os.IsNotExist(err) {
-		t.Errorf("stale tmp file left behind: %v", err)
+	matches, err := filepath.Glob(filepath.Join(testDir, "tmp.*.json"))
+	if err != nil || len(matches) != 0 {
+		t.Errorf("stale tmp file left behind: %v", matches)
 	}
 }
 
 func TestRoundTrip(t *testing.T) {
 	chdirTemp(t)
-	s := NewItemStore()
+	s := NewItemStore(testFile)
 	s.AddEntry(CreateEntry("alpha"))
 	s.AddEntry(CreateEntry("beta"))
 	s.Save()
 
-	loaded, err := ReadDB()
+	loaded, err := ReadDB(testFile)
 	if err != nil {
 		t.Fatalf("ReadDB returned unexpected error: %v", err)
 	}
@@ -119,5 +120,29 @@ func TestRoundTrip(t *testing.T) {
 	}
 	if entries[0].Name != "alpha" || entries[1].Name != "beta" {
 		t.Errorf("round trip got %v, want [alpha beta]", entries)
+	}
+}
+
+func TestRoundTripResaveAfterLoad(t *testing.T) {
+	chdirTemp(t)
+	s := NewItemStore(testFile)
+	s.AddEntry(CreateEntry("alpha"))
+	s.Save()
+
+	loaded, err := ReadDB(testFile)
+	if err != nil {
+		t.Fatalf("ReadDB returned unexpected error: %v", err)
+	}
+	loaded.AddEntry(CreateEntry("beta"))
+	if err := loaded.Save(); err != nil {
+		t.Fatalf("Save after load failed: %v", err)
+	}
+
+	reloaded, err := ReadDB(testFile)
+	if err != nil {
+		t.Fatalf("ReadDB returned unexpected error: %v", err)
+	}
+	if got := len(reloaded.GetEntries().Entries); got != 2 {
+		t.Errorf("reloaded %d entries, want 2", got)
 	}
 }
