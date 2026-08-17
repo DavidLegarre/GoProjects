@@ -37,9 +37,9 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	loop(itemStore)
+	err = loop(itemStore)
 
-	return nil
+	return err
 }
 
 func loadStore() (*store.ItemStore, error) {
@@ -83,7 +83,10 @@ func loop(itemStore *store.ItemStore) error {
 			scanner:   sc,
 			itemStore: itemStore,
 		}
-		command(arguments)
+		err = command(arguments)
+		if err != nil {
+			fmt.Printf("There was an error running the command:", err)
+		}
 	}
 }
 
@@ -109,11 +112,21 @@ func cmdAdd(args *CommandArguments) error {
 		return nil
 	}
 
+	_, found := args.itemStore.SearchEntryByName(name)
+	if found {
+		fmt.Printf("Entry with name %q already exists.\n", name)
+		return nil
+	}
 	entry := store.CreateEntry(name)
 	args.itemStore.AddEntry(entry)
-	err = args.itemStore.Save()
-	if err != nil {
-		fmt.Println("Error storing changes to the DB", err)
+	tries := 3
+	for range tries {
+		err = args.itemStore.Save()
+		if err != nil {
+			fmt.Println("Error storing changes to the DB", err)
+		} else {
+			break
+		}
 	}
 	return err
 }

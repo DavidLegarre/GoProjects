@@ -42,13 +42,13 @@ func (s *ItemStore) GetEntries() types.TodoList {
 	return s.items
 }
 
-func (s *ItemStore) SearchEntryByName(name string) *types.TodoEntry {
+func (s *ItemStore) SearchEntryByName(name string) (int, bool) {
 	for i := range s.items.Entries {
 		if s.items.Entries[i].Name == name {
-			return &s.items.Entries[i]
+			return i, true
 		}
 	}
-	return nil
+	return -1, false
 }
 
 func (s *ItemStore) PrintEntries() {
