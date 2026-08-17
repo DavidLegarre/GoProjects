@@ -88,19 +88,18 @@ func TestSearchEntryByName(t *testing.T) {
 	s.AddEntry(CreateEntry("alpha"))
 	s.AddEntry(CreateEntry("beta"))
 
-	found := s.SearchEntryByName("alpha")
-	if found == nil {
-		t.Fatal("expected to find alpha")
-	}
-	if found.Name != "alpha" {
-		t.Errorf("Name = %q, want %q", found.Name, "alpha")
+	idx, found := s.SearchEntryByName("alpha")
+	if !found || idx != 0 {
+		t.Errorf("SearchEntryByName(alpha) = (%d, %v), want (0, true)", idx, found)
 	}
 
-	if got := s.SearchEntryByName("missing"); got != nil {
-		t.Errorf("expected nil for missing name, got %v", got)
+	idx, found = s.SearchEntryByName("beta")
+	if !found || idx != 1 {
+		t.Errorf("SearchEntryByName(beta) = (%d, %v), want (1, true)", idx, found)
 	}
 
-	if got := s.SearchEntryByName("alpha"); got != &s.items.Entries[0] {
-		t.Error("returned pointer is not the stored entry")
+	idx, found = s.SearchEntryByName("missing")
+	if found || idx != -1 {
+		t.Errorf("SearchEntryByName(missing) = (%d, %v), want (-1, false)", idx, found)
 	}
 }

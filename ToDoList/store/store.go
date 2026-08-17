@@ -26,6 +26,10 @@ func (s *ItemStore) AddEntry(entry types.TodoEntry) {
 	s.items.Entries = append(s.items.Entries, entry)
 }
 
+func (s *ItemStore) PopEntry() {
+	s.items.Entries = s.items.Entries[:len(s.items.Entries)-1]
+}
+
 func (s *ItemStore) RemoveEntryByName(name string) error {
 	ogLen := len(s.items.Entries)
 	s.items.Entries = slices.DeleteFunc(s.items.Entries, func(entry types.TodoEntry) bool {

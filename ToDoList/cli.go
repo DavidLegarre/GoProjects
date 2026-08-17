@@ -119,14 +119,10 @@ func cmdAdd(args *CommandArguments) error {
 	}
 	entry := store.CreateEntry(name)
 	args.itemStore.AddEntry(entry)
-	tries := 3
-	for range tries {
-		err = args.itemStore.Save()
-		if err != nil {
-			fmt.Println("Error storing changes to the DB", err)
-		} else {
-			break
-		}
+	err = args.itemStore.Save()
+	if err != nil {
+		fmt.Println("Error storing changes to the DB", err)
+		args.itemStore.PopEntry()
 	}
 	return err
 }
