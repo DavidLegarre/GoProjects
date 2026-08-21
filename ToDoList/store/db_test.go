@@ -1,10 +1,12 @@
 package store
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
 	"testing"
+	"todolist/types"
 )
 
 const testDir = "ToDoList"
@@ -28,7 +30,7 @@ func writeTestFile(t *testing.T, content string) {
 
 func TestReadDB_Valid(t *testing.T) {
 	chdirTemp(t)
-	writeTestFile(t, `{"Entries":[{"Name":"alpha","DoneStatus":false}]}`)
+	writeTestFile(t, `{"EntryMap":{"e0e0e0e0-e0e0-4e0e-8e0e-e0e0e0e0e0e0":{"Name":"alpha","DoneStatus":false}}}`)
 
 	s, err := ReadDB(testFile)
 	if err != nil {
@@ -37,9 +39,12 @@ func TestReadDB_Valid(t *testing.T) {
 	if s == nil {
 		t.Fatal("ReadDB returned a nil store")
 	}
-	entries := s.GetEntries().Entries
-	if len(entries) != 1 || entries[0].Name != "alpha" {
-		t.Errorf("got %v, want one entry named alpha", entries)
+	names := map[string]bool{}
+	for _, e := range s.GetEntries().EntryMap {
+		names[e.Name] = true
+	}
+	if len(names) != 1 || !names["alpha"] {
+		t.Errorf("got %v, want one entry named alpha", names)
 	}
 }
 
@@ -90,9 +95,17 @@ func TestWriteDB(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := `{"Entries":[{"Name":"gamma","DoneStatus":false}]}`
-	if string(data) != want {
-		t.Errorf("file content = %s, want %s", data, want)
+	var tl types.TodoList
+	if err := json.Unmarshal(data, &tl); err != nil {
+		t.Fatalf("file content not valid TodoList JSON: %v", err)
+	}
+	if len(tl.EntryMap) != 1 {
+		t.Fatalf("expected 1 entry, got %d", len(tl.EntryMap))
+	}
+	for _, e := range tl.EntryMap {
+		if e.Name != "gamma" {
+			t.Errorf("got %q, want gamma", e.Name)
+		}
 	}
 	matches, err := filepath.Glob(filepath.Join(testDir, "tmp.*.json"))
 	if err != nil || len(matches) != 0 {
@@ -114,12 +127,12 @@ func TestRoundTrip(t *testing.T) {
 	if loaded == nil {
 		t.Fatal("ReadDB returned a nil store")
 	}
-	entries := loaded.GetEntries().Entries
-	if len(entries) != 2 {
-		t.Fatalf("loaded %d entries, want 2", len(entries))
+	names := map[string]bool{}
+	for _, e := range loaded.GetEntries().EntryMap {
+		names[e.Name] = true
 	}
-	if entries[0].Name != "alpha" || entries[1].Name != "beta" {
-		t.Errorf("round trip got %v, want [alpha beta]", entries)
+	if len(names) != 2 || !names["alpha"] || !names["beta"] {
+		t.Errorf("round trip got %v, want [alpha beta]", names)
 	}
 }
 
@@ -142,7 +155,7 @@ func TestRoundTripResaveAfterLoad(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ReadDB returned unexpected error: %v", err)
 	}
-	if got := len(reloaded.GetEntries().Entries); got != 2 {
+	if got := len(reloaded.GetEntries().EntryMap); got != 2 {
 		t.Errorf("reloaded %d entries, want 2", got)
 	}
 }

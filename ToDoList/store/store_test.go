@@ -10,8 +10,8 @@ func TestNewItemStore(t *testing.T) {
 	if s == nil {
 		t.Fatal("NewItemStore returned nil")
 	}
-	if got := s.GetEntries().Entries; got != nil {
-		t.Errorf("expected nil entries, got %v", got)
+	if got := s.GetEntries().EntryMap; got == nil {
+		t.Errorf("expected initialized map, got nil")
 	}
 }
 
@@ -22,13 +22,17 @@ func TestAddEntry(t *testing.T) {
 		s.AddEntry(CreateEntry(name))
 	}
 
-	entries := s.GetEntries().Entries
+	entries := s.GetEntries().EntryMap
 	if len(entries) != len(names) {
 		t.Fatalf("expected %d entries, got %d", len(names), len(entries))
 	}
-	for i, name := range names {
-		if entries[i].Name != name {
-			t.Errorf("entry %d: expected %q, got %q", i, name, entries[i].Name)
+	got := map[string]bool{}
+	for _, e := range entries {
+		got[e.Name] = true
+	}
+	for _, name := range names {
+		if !got[name] {
+			t.Errorf("missing entry %q", name)
 		}
 	}
 }
@@ -60,16 +64,20 @@ func TestRemoveEntryByName(t *testing.T) {
 				t.Errorf("RemoveEntryByName(%q) = %v, want %v", tt.remove, got, tt.wantErr)
 			}
 
-			left := s.GetEntries().Entries
-			if len(left) != len(tt.wantLeft) {
-				t.Fatalf("left with %d entries, want %d", len(left), len(tt.wantLeft))
+left := s.GetEntries().EntryMap
+		if len(left) != len(tt.wantLeft) {
+			t.Fatalf("left with %d entries, want %d", len(left), len(tt.wantLeft))
+		}
+		names := map[string]bool{}
+		for _, e := range left {
+			names[e.Name] = true
+		}
+		for _, n := range tt.wantLeft {
+			if !names[n] {
+				t.Errorf("missing %q in left entries", n)
 			}
-			for i, n := range tt.wantLeft {
-				if left[i].Name != n {
-					t.Errorf("left[%d] = %q, want %q", i, left[i].Name, n)
-				}
-			}
-		})
+		}
+	})
 	}
 }
 
@@ -88,18 +96,18 @@ func TestSearchEntryByName(t *testing.T) {
 	s.AddEntry(CreateEntry("alpha"))
 	s.AddEntry(CreateEntry("beta"))
 
-	idx, found := s.SearchEntryByName("alpha")
-	if !found || idx != 0 {
-		t.Errorf("SearchEntryByName(alpha) = (%d, %v), want (0, true)", idx, found)
+	e, found := s.SearchEntryByName("alpha")
+	if !found || e.Name != "alpha" {
+		t.Errorf("SearchEntryByName(alpha) = (%v, %v), want (alpha, true)", e.Name, found)
 	}
 
-	idx, found = s.SearchEntryByName("beta")
-	if !found || idx != 1 {
-		t.Errorf("SearchEntryByName(beta) = (%d, %v), want (1, true)", idx, found)
+	e, found = s.SearchEntryByName("beta")
+	if !found || e.Name != "beta" {
+		t.Errorf("SearchEntryByName(beta) = (%v, %v), want (beta, true)", e.Name, found)
 	}
 
-	idx, found = s.SearchEntryByName("missing")
-	if found || idx != -1 {
-		t.Errorf("SearchEntryByName(missing) = (%d, %v), want (-1, false)", idx, found)
+	e, found = s.SearchEntryByName("missing")
+	if found || e.Name != "" {
+		t.Errorf("SearchEntryByName(missing) = (%v, %v), want (\"\", false)", e.Name, found)
 	}
 }

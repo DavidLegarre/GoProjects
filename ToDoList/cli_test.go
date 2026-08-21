@@ -9,7 +9,18 @@ import (
 	"strings"
 	"testing"
 	"todolist/store"
+	"todolist/types"
+
+	"github.com/google/uuid"
 )
+
+func entryNames(entries map[uuid.UUID]types.TodoEntry) map[string]bool {
+	names := map[string]bool{}
+	for _, e := range entries {
+		names[e.Name] = true
+	}
+	return names
+}
 
 func newTestArgs(t *testing.T, input string, s *store.ItemStore) *CommandArguments {
 	t.Helper()
@@ -46,14 +57,14 @@ func TestLoadStoreFresh(t *testing.T) {
 	if s == nil {
 		t.Fatal("loadStore returned nil store")
 	}
-	if got := len(s.GetEntries().Entries); got != 0 {
+	if got := len(s.GetEntries().EntryMap); got != 0 {
 		t.Errorf("got %d entries, want 0", got)
 	}
 }
 
 func TestLoadStoreExisting(t *testing.T) {
 	chdirTemp(t)
-	content := `{"Entries":[{"Name":"alpha","DoneStatus":false}]}`
+	content := `{"EntryMap":{"e0e0e0e0-e0e0-4e0e-8e0e-e0e0e0e0e0e0":{"Name":"alpha","DoneStatus":false}}}`
 	if err := os.WriteFile("TodoList.json", []byte(content), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -61,9 +72,9 @@ func TestLoadStoreExisting(t *testing.T) {
 	if err != nil {
 		t.Fatalf("loadStore returned error: %v", err)
 	}
-	entries := s.GetEntries().Entries
-	if len(entries) != 1 || entries[0].Name != "alpha" {
-		t.Errorf("got %v, want one entry named alpha", entries)
+	names := entryNames(s.GetEntries().EntryMap)
+	if len(names) != 1 || !names["alpha"] {
+		t.Errorf("got %v, want one entry named alpha", names)
 	}
 }
 
@@ -89,9 +100,9 @@ func TestCmdAdd(t *testing.T) {
 	if err := cmdAdd(newTestArgs(t, "buy milk\n", s)); err != nil {
 		t.Fatalf("cmdAdd returned error: %v", err)
 	}
-	entries := s.GetEntries().Entries
-	if len(entries) != 1 || entries[0].Name != "buy milk" {
-		t.Errorf("got %v, want one entry named buy milk", entries)
+	names := entryNames(s.GetEntries().EntryMap)
+	if len(names) != 1 || !names["buy milk"] {
+		t.Errorf("got %v, want one entry named buy milk", names)
 	}
 }
 
@@ -100,7 +111,7 @@ func TestCmdAddEmptyName(t *testing.T) {
 	if err := cmdAdd(newTestArgs(t, "   \n", s)); err != nil {
 		t.Fatalf("cmdAdd returned error: %v", err)
 	}
-	if got := len(s.GetEntries().Entries); got != 0 {
+	if got := len(s.GetEntries().EntryMap); got != 0 {
 		t.Errorf("got %d entries, want 0", got)
 	}
 }
@@ -113,7 +124,7 @@ func TestCmdAddDuplicate(t *testing.T) {
 	if err := cmdAdd(newTestArgs(t, "buy milk\n", s)); err != nil {
 		t.Fatalf("second cmdAdd: %v", err)
 	}
-	if got := len(s.GetEntries().Entries); got != 1 {
+	if got := len(s.GetEntries().EntryMap); got != 1 {
 		t.Errorf("got %d entries, want 1 (duplicate rejected)", got)
 	}
 }
@@ -123,7 +134,7 @@ func TestCmdAddFetchError(t *testing.T) {
 	if err := cmdAdd(newTestArgs(t, "", s)); !errors.Is(err, io.EOF) {
 		t.Errorf("expected io.EOF, got %v", err)
 	}
-	if got := len(s.GetEntries().Entries); got != 0 {
+	if got := len(s.GetEntries().EntryMap); got != 0 {
 		t.Errorf("got %d entries, want 0", got)
 	}
 }
@@ -135,9 +146,9 @@ func TestCmdRemove(t *testing.T) {
 	if err := cmdRemove(newTestArgs(t, "alpha\n", s)); err != nil {
 		t.Fatalf("cmdRemove returned error: %v", err)
 	}
-	entries := s.GetEntries().Entries
-	if len(entries) != 1 || entries[0].Name != "beta" {
-		t.Errorf("got %v, want [beta]", entries)
+	names := entryNames(s.GetEntries().EntryMap)
+	if len(names) != 1 || !names["beta"] {
+		t.Errorf("got %v, want [beta]", names)
 	}
 }
 
@@ -148,7 +159,7 @@ func TestCmdRemoveNotFound(t *testing.T) {
 	if !errors.Is(err, store.ErrNotFound) {
 		t.Errorf("expected ErrNotFound, got %v", err)
 	}
-	if got := len(s.GetEntries().Entries); got != 1 {
+	if got := len(s.GetEntries().EntryMap); got != 1 {
 		t.Errorf("got %d entries, want 1", got)
 	}
 }
@@ -179,8 +190,8 @@ func TestLoop(t *testing.T) {
 	if err := loop(s); err != nil {
 		t.Fatalf("loop returned error: %v", err)
 	}
-	entries := s.GetEntries().Entries
-	if len(entries) != 1 || entries[0].Name != "buy milk" {
-		t.Errorf("got %v, want one entry named buy milk", entries)
+	names := entryNames(s.GetEntries().EntryMap)
+	if len(names) != 1 || !names["buy milk"] {
+		t.Errorf("got %v, want one entry named buy milk", names)
 	}
 }

@@ -85,7 +85,7 @@ func loop(itemStore *store.ItemStore) error {
 		}
 		err = command(arguments)
 		if err != nil {
-			fmt.Printf("There was an error running the command:", err)
+			fmt.Printf("There was an error running the command: %v\n", err)
 		}
 	}
 }
@@ -122,7 +122,7 @@ func cmdAdd(args *CommandArguments) error {
 	err = args.itemStore.Save()
 	if err != nil {
 		fmt.Println("Error storing changes to the DB", err)
-		args.itemStore.PopEntry()
+		args.itemStore.PopEntry(entry.Id)
 	}
 	return err
 }

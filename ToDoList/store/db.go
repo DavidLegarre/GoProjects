@@ -21,7 +21,7 @@ func ReadDB(path string) (*ItemStore, error) {
 }
 
 func WriteDB(itemStore *ItemStore) error {
-	b, err := json.Marshal(itemStore.GetEntries())
+	b, err := json.Marshal(itemStore.items)
 	if err != nil {
 		return err
 	}
